@@ -76,7 +76,12 @@ module ContentfulModel
             # Model.search(start_date: {gte: DateTime.now}) => "fields.start_date[gte]" => DateTime.now
             query.each do |field, condition|
               search_predicate, search_value = *condition.flatten
-              @query << {"fields.#{field.to_s.camelize(:lower)}[#{search_predicate}]" => search_value}
+              search_value = search_value.join(',') if search_value.is_a?(Array)
+              if field.to_s == 'id'
+                @query << { "sys.id[#{search_predicate}]" => search_value }
+              else
+                @query << {"fields.#{field.to_s.camelize(:lower)}[#{search_predicate}]" => search_value}
+              end
             end
           end
         end
